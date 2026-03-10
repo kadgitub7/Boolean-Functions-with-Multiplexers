@@ -31,10 +31,7 @@ A Verilog implementation of a **Boolean function using a 4×1 multiplexer with e
 This project demonstrates how a **4×1 multiplexer** can be used to implement a given **four‑variable Boolean function**:
 
 - **Variables:** A, B, C, D  
-- **Function:**  
-  \[
-  F(A,B,C,D) = \sum m(1,4,5,7,9,12,13)
-  \]
+- **Function:** `F(A,B,C,D) = Σm(1,4,5,7,9,12,13)`
 
 Rather than implementing the function directly with AND/OR/NOT gates, we:
 
@@ -52,24 +49,24 @@ A **multiplexer (MUX)** is a combinational circuit that selects **one of several
 
 For a 4×1 MUX:
 
-- **Data inputs:** I₀, I₁, I₂, I₃  
-- **Select lines:** S₁, S₀ (2 bits)  
+- **Data inputs:** I<sub>0</sub>, I<sub>1</sub>, I<sub>2</sub>, I<sub>3</sub>  
+- **Select lines:** S<sub>1</sub>, S<sub>0</sub> (2 bits)  
 - **Optional enable:** E  
 - **Output:** Y
 
 Selection behavior when **E = 1**:
 
-| S₁ | S₀ | Selected Output |
-|----|----|-----------------|
-| 0  | 0  | Y = I₀          |
-| 0  | 1  | Y = I₁          |
-| 1  | 0  | Y = I₂          |
-| 1  | 1  | Y = I₃          |
+| S<sub>1</sub> | S<sub>0</sub> | Selected Output   |
+|---------------|---------------|-------------------|
+| 0             | 0             | Y = I<sub>0</sub> |
+| 0             | 1             | Y = I<sub>1</sub> |
+| 1             | 0             | Y = I<sub>2</sub> |
+| 1             | 1             | Y = I<sub>3</sub> |
 
 Including enable:
 
 - **E = 0 → Y = 0** (MUX disabled)  
-- **E = 1 → Y = I\_k** for the selected input.
+- **E = 1 → Y =** \(I_k\) **for the selected input**.
 
 In this project:
 
@@ -83,10 +80,7 @@ In this project:
 
 We want to implement the Boolean function:
 
-- **Function definition:**  
-  \[
-  F(A,B,C,D) = \sum m(1,4,5,7,9,12,13)
-  \]
+- **Function definition:** `F(A,B,C,D) = Σm(1,4,5,7,9,12,13)`
 
 Using standard minterm numbering (A as MSB, D as LSB), the minterms correspond to the following input combinations:
 
@@ -146,9 +140,9 @@ AB
 Next, we choose which variables will be the **select lines** of the 4×1 multiplexer.
 
 - **Select lines:** A, B  
-  - S₁ = A  
-  - S₀ = B  
-- Remaining variables C, D are used to define the **input expressions** I₀–I₃.
+  - S<sub>1</sub> = A  
+  - S<sub>0</sub> = B  
+- Remaining variables C, D are used to define the **input expressions** I<sub>0</sub>–I<sub>3</sub>.
 
 Each **row** of the K‑map (fixed A,B) gives the behavior of the function as a function of C and D only, which becomes the corresponding **data input** to the MUX.
 
@@ -158,37 +152,37 @@ Each **row** of the K‑map (fixed A,B) gives the behavior of the function as a 
 
 With `S1 = A` and `S0 = B`, the four MUX inputs correspond to the four rows of the K‑map:
 
-| A (S₁) | B (S₀) | Selected input | Row function of C,D | MUX input |
-|--------|--------|----------------|---------------------|-----------|
-| 0      | 0      | I₀             | F(0,0,C,D)          | I₀        |
-| 0      | 1      | I₁             | F(0,1,C,D)          | I₁        |
-| 1      | 0      | I₂             | F(1,0,C,D)          | I₂        |
-| 1      | 1      | I₃             | F(1,1,C,D)          | I₃        |
+| A (S<sub>1</sub>) | B (S<sub>0</sub>) | Selected input   | Row function of C,D | MUX input     |
+|-------------------|-------------------|------------------|---------------------|---------------|
+| 0                 | 0                 | I<sub>0</sub>    | F(0,0,C,D)          | I<sub>0</sub> |
+| 0                 | 1                 | I<sub>1</sub>    | F(0,1,C,D)          | I<sub>1</sub> |
+| 1                 | 0                 | I<sub>2</sub>    | F(1,0,C,D)          | I<sub>2</sub> |
+| 1                 | 1                 | I<sub>3</sub>    | F(1,1,C,D)          | I<sub>3</sub> |
 
 From the K‑map rows, we derive the C,D‑only expressions:
 
 | A | B | F as function of C,D | Simplified expression |
 |---|---|----------------------|-----------------------|
-| 0 | 0 | 0 1 0 0              | **C̄D**               |
-| 0 | 1 | 1 1 1 0              | **C̄ + D**            |
-| 1 | 0 | 0 1 0 0              | **C̄D**               |
-| 1 | 1 | 1 1 0 0              | **C̄**                |
+| 0 | 0 | 0 1 0 0              | **C'D**               |
+| 0 | 1 | 1 1 1 0              | **C' + D**            |
+| 1 | 0 | 0 1 0 0              | **C'D**               |
+| 1 | 1 | 1 1 0 0              | **C'**                |
 
 So we map:
 
-- **I₀ = C̄D**  
-- **I₁ = C̄ + D**  
-- **I₂ = C̄D**  
-- **I₃ = C̄**
+- **I<sub>0</sub> = C'D**  
+- **I<sub>1</sub> = C' + D**  
+- **I<sub>2</sub> = C'D**  
+- **I<sub>3</sub> = C'**
 
 This is exactly what the Verilog module `boolMultiplexer` implements:
 
 - `S0 = B`  
 - `S1 = A`  
-- `I0 = ~C & D`  
-- `I1 = ~C | D`  
-- `I2 = ~C & D`  
-- `I3 = ~C`
+- `I0 = ~C & D`  (C'D)  
+- `I1 = ~C | D`  (C' + D)  
+- `I2 = ~C & D`  (C'D)  
+- `I3 = ~C`      (C')
 
 Then a single instance of `fourToOneMultiplexer` realizes the full function.
 
@@ -198,37 +192,24 @@ Then a single instance of `fourToOneMultiplexer` realizes the full function.
 
 The generic equation for a 4×1 MUX with enable **E** is:
 
-\[
-Y = E(\overline{S_1}\,\overline{S_0}I_0 + \overline{S_1}S_0I_1 + S_1\overline{S_0}I_2 + S_1S_0I_3)
-\]
+`Y = E( S1' S0' I0 + S1' S0 I1 + S1 S0' I2 + S1 S0 I3 )`
 
 Substituting:
 
-- \( S_1 = A \), \( S_0 = B \)  
-- \( I_0 = \overline{C}D \)  
-- \( I_1 = \overline{C} + D \)  
-- \( I_2 = \overline{C}D \)  
-- \( I_3 = \overline{C} \)  
-- \( E = 1 \)
+- `S1 = A`, `S0 = B`  
+- `I0 = C'D`  
+- `I1 = C' + D`  
+- `I2 = C'D`  
+- `I3 = C'`  
+- `E = 1`
 
 we obtain:
 
-\[
-F(A,B,C,D) =
-\overline{A}\,\overline{B}\,\overline{C}D
-+
-\overline{A}B(\overline{C} + D)
-+
-A\overline{B}\,\overline{C}D
-+
-AB\,\overline{C}
-\]
+`F(A,B,C,D) = A'B'C'D + A'B(C' + D) + AB'C'D + ABC'`
 
 which simplifies exactly to:
 
-\[
-F(A,B,C,D) = \sum m(1,4,5,7,9,12,13)
-\]
+`F(A,B,C,D) = Σm(1,4,5,7,9,12,13)`
 
 matching the original specification.
 
@@ -242,21 +223,22 @@ The top‑level circuit can be viewed as:
 
 - **Input decoding stage:**  
   - Generates the four C,D‑dependent signals:  
-    - \(I_0 = \overline{C}D\)  
-    - \(I_1 = \overline{C} + D\)  
-    - \(I_2 = \overline{C}D\)  
-    - \(I_3 = \overline{C}\)
+    - `I0 = C'D`  
+    - `I1 = C' + D`  
+    - `I2 = C'D`  
+    - `I3 = C'`
 - **4×1 MUX core:**  
   - Uses `A` and `B` as select inputs.  
-  - Routes one of I₀–I₃ to the output `Y`.  
+  - Routes one of `I0`–`I3` to the output `Y`.  
   - Enable `E` is tied high.
 
-If you have schematic images or waveform screenshots, you can place them in an `imageAssets/` folder and embed them here, for example:
+### Circuit Diagram
 
-```markdown
-![4×1 MUX‑based Boolean Function Circuit](imageAssets/bool-mux-circuit.png)
-![4×1 MUX Waveform](imageAssets/bool-mux-waveform.png)
-```
+![4×1 MUX‑based Boolean Function Circuit](imageAssets/BoolMultiplexerCircuit.png)
+
+### Waveform Diagram
+
+![4×1 MUX Waveform](imageAssets/BoolMultiplexerWaveform.png)
 
 ### Waveform Behavior
 
